@@ -1,4 +1,5 @@
 from django.db import models
+from networkx import reverse
 
 # Create your models here.
 
@@ -16,8 +17,8 @@ class Lieferant(models.Model):
     def __str__(self):
         return self.name
 
-    # def get_absolute_url(self):
-    #     return reverse("Lieferant_detail", kwargs={"pk": self.pk})
+    def get_absolute_url(self):
+        return reverse("Lieferant_detail", kwargs={"pk": self.pk})
 
 
 class Lieferung(models.Model):
@@ -29,7 +30,60 @@ class Lieferung(models.Model):
         verbose_name_plural = ("Lieferungen")
 
     def __str__(self):
-        return self.name
+        return f"{self.datum}/{self.lieferant}"
+    
 
     def get_absolute_url(self):
         return reverse("Lieferung_detail", kwargs={"pk": self.pk})
+    
+
+class Artikel(models.Model):
+    mindestbestand = models.IntegerField(("Mindestbestand"))
+    bezeichnung = models.CharField(("Bezeichnung"), max_length=50)
+    liefereinheit = models.CharField(("Liefereinheit"), max_length=50)
+    bemerkung = models.TextField(("Bemerkung"), null=True, blank=True) 
+    #'null' ist für die DB, 'blank' ist für die Oberfläche, das das Feld leer bleibt
+    ekpreis = models.IntegerField(("Einkaufspreis in €-Cent"))
+
+    class Meta:
+        verbose_name = ("Artikel")
+        verbose_name_plural = ("Artikel")
+
+    def __str__(self):
+        return self.bezeichnung
+
+    def get_absolute_url(self):
+        return reverse("Artikel_detail", kwargs={"pk": self.pk})
+    
+
+class Lieferposition(models.Model):
+    artikel = models.ForeignKey(Artikel, verbose_name=("Artikel"), on_delete=models.CASCADE)
+    lieferung = models.ForeignKey(Lieferung, verbose_name=("Lieferung"), on_delete=models.CASCADE)
+    verkaufspreis = models.IntegerField(("Verkaufspreis Cent"))
+    menge = models.IntegerField(("Anzahl"))
+
+    class Meta:
+        verbose_name = ("Lieferposition")
+        verbose_name_plural = ("Lieferpositions")
+
+    def __str__(self):
+        return f"{self.artikel} - {self.lieferung}"
+
+    def get_absolute_url(self):
+        return reverse("Lieferposition_detail", kwargs={"pk": self.pk})
+
+class Lagerplatz(models.Model):
+    bestand = models.IntegerField(("Bestand"))
+    artikel = models.ForeignKey(Artikel, verbose_name=_("Artikel"), on_delete=models.CASCADE)
+    bezeichnung = models.CharField(("Bezeichnung"), max_length=50)
+
+    class Meta:
+        verbose_name = ("Lagerplatz")
+        verbose_name_plural = ("Lagerplätze")
+
+    def __str__(self):
+        return f"{self.bezeichnung} - {self.artikel}" 
+
+    def get_absolute_url(self):
+        return reverse("Lagerplatz_detail", kwargs={"pk": self.pk})
+    
