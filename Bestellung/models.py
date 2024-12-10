@@ -1,15 +1,13 @@
 from django.db import models
-from networkx import reverse
+from django.urls import reverse
 
 # Create your models here.
-
 
 class Lieferant(models.Model):
     name = models.CharField(("Name"), max_length=50)
     email = models.CharField(("E-Mail"), max_length=50)
     telefon = models.CharField(("Telefonnummer"), max_length=50)
     
-
     class Meta:
         verbose_name = ("Lieferant")
         verbose_name_plural = ("Lieferanten")
@@ -31,7 +29,6 @@ class Lieferung(models.Model):
 
     def __str__(self):
         return f"{self.datum}/{self.lieferant}"
-    
 
     def get_absolute_url(self):
         return reverse("Lieferung_detail", kwargs={"pk": self.pk})
@@ -39,7 +36,7 @@ class Lieferung(models.Model):
 
 class Artikel(models.Model):
     mindestbestand = models.IntegerField(("Mindestbestand"))
-    bezeichnung = models.CharField(("Bezeichnung"), max_length=50)
+    bezeichnung = models.CharField(("Bezeichnung"), max_length=250)
     liefereinheit = models.CharField(("Liefereinheit"), max_length=50)
     bemerkung = models.TextField(("Bemerkung"), null=True, blank=True) 
     #'null' ist für die DB, 'blank' ist für die Oberfläche, das das Feld leer bleibt
@@ -64,17 +61,17 @@ class Lieferposition(models.Model):
 
     class Meta:
         verbose_name = ("Lieferposition")
-        verbose_name_plural = ("Lieferpositions")
+        verbose_name_plural = ("Lieferpositionen")
 
     def __str__(self):
-        return f"{self.artikel} - {self.lieferung}"
+        return f"{self.artikel} - {self.lieferung} "
 
     def get_absolute_url(self):
         return reverse("Lieferposition_detail", kwargs={"pk": self.pk})
 
 class Lagerplatz(models.Model):
     bestand = models.IntegerField(("Bestand"))
-    artikel = models.ForeignKey(Artikel, verbose_name=_("Artikel"), on_delete=models.CASCADE)
+    artikel = models.ForeignKey(Artikel, verbose_name=("Artikel"), on_delete=models.CASCADE)
     bezeichnung = models.CharField(("Bezeichnung"), max_length=50)
 
     class Meta:
@@ -82,7 +79,7 @@ class Lagerplatz(models.Model):
         verbose_name_plural = ("Lagerplätze")
 
     def __str__(self):
-        return f"{self.bezeichnung} - {self.artikel}" 
+        return f"{self.bezeichnung} - {self.artikel} ({self.bestand } {self.artikel.liefereinheit})" 
 
     def get_absolute_url(self):
         return reverse("Lagerplatz_detail", kwargs={"pk": self.pk})
